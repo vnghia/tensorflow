@@ -1,7 +1,7 @@
 # Experimental filesystem C APIs for TensorFlow.
 # Will be moved in proper place once all filesystems are converted to the
 # modular framework.
-load("//tensorflow:tensorflow.bzl", "tf_cc_test")
+load("//tensorflow:tensorflow.bzl", "tf_cc_test", "tf_cc_shared_object")
 
 package(
     licenses = ["notice"],  # Apache 2.0
@@ -16,6 +16,17 @@ cc_library(
         "//tensorflow/c:tf_file_statistics",
         "//tensorflow/c:tf_status",
     ],
+)
+
+# This is a shared object of modular_filesystem to load into Tensorflow
+# for testing purposes
+tf_cc_shared_object(
+    name = "modular_filesystem_shared",
+    framework_so = [],
+    linkstatic = False,
+    visibility = ["//visibility:public"],
+    deps = [":modular_filesystem"],
+    per_os_targets = 1,
 )
 
 # Core TensorFlow depends on this, will be included in main library
