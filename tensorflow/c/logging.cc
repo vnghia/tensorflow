@@ -24,7 +24,7 @@ static ::tensorflow::string BuildMessage(const char* fmt, va_list args) {
 }
 
 void TF_Log(TF_LogLevel level, const char* fmt, ...) {
-  if (level < 0 || level > 3) return;
+  if (level < TF_INFO || level > TF_FATAL) return;
   va_list args;
   va_start(args, fmt);
   auto message = BuildMessage(fmt, args);
