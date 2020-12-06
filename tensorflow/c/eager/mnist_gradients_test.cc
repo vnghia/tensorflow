@@ -425,6 +425,7 @@ TEST_P(CppGradients, TestSoftmaxLossGrad) {
   int y_vals[] = {1, 0, 1};
   int64_t y_dims[] = {3};
   num_dims = sizeof(y_dims) / sizeof(y_dims[0]);
+  std::cout << num_dims << "\n";
   AbstractTensorHandlePtr y =
       GetTensorHandleUtilInt(ctx.get(), y_vals, y_dims, num_dims);
 
@@ -461,6 +462,7 @@ TEST_P(CppGradients, TestSoftmaxLossGrad) {
                           0.6652f, 0.8437f,  -0.8858f, 0.0420f};
   float tolerance = 1e-3;
   for (int j = 0; j < 9; j++) {
+    std::cout << result_data[j] << "\n";
     ASSERT_NEAR(result_data[j], expected_dX[j], tolerance);
   }
 
