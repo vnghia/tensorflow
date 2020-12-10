@@ -22,6 +22,14 @@ limitations under the License.
 
 namespace tensorflow {
 
+namespace internal {
+struct TF_TensorDeleter {
+  void operator()(TF_Tensor* t) const { TF_DeleteTensor(t); }
+};
+}  // namespace internal
+
+using TF_TensorPtr = std::unique_ptr<TF_Tensor, internal::TF_TensorDeleter>;
+
 // Builds and returns a `TracingContext` using the default tracing impl.
 AbstractContext* BuildFunction(const char* fn_name);
 

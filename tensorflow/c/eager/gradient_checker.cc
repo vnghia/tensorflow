@@ -56,9 +56,14 @@ Status RunAndMaybeSum(AbstractContext* ctx, Model forward,
                               absl::MakeSpan(model_outputs), use_function));
   AbstractTensorHandle* model_out = model_outputs[0];
 
-  TF_Tensor* model_out_tensor;
-  TF_RETURN_IF_ERROR(GetValue(model_out, &model_out_tensor));
-  int num_dims_out = TF_NumDims(model_out_tensor);
+  TF_TensorPtr model_out_tensor;
+  {
+    TF_Tensor* model_out_tensor_raw = nullptr;
+    TF_RETURN_IF_ERROR(GetValue(model_out, &model_out_tensor_raw));
+    model_out_tensor.reset(model_out_tensor_raw);
+  }
+
+  int num_dims_out = TF_NumDims(model_out_tensor.get());
 
   // If the output is a scalar, then return the scalar output
   if (num_dims_out == 0) {
@@ -105,22 +110,26 @@ Status CalcNumericalGrad(AbstractContext* ctx, Model forward,
       theta_inputs[input_index];  // parameter we are grad checking
 
   // Convert from AbstractTensor to TF_Tensor.
-  TF_Tensor* theta_tensor;
-  TF_RETURN_IF_ERROR(GetValue(theta, &theta_tensor));
+  TF_TensorPtr theta_tensor;
+  {
+    TF_Tensor* theta_tensor_raw = nullptr;
+    TF_RETURN_IF_ERROR(GetValue(theta, &theta_tensor_raw));
+    theta_tensor.reset(theta_tensor_raw);
+  }
 
   // Get number of elements and fill data.
-  int num_elems = TF_TensorElementCount(theta_tensor);
+  int num_elems = TF_TensorElementCount(theta_tensor.get());
   vector<float> theta_data(num_elems);
-  memcpy(theta_data.data(), TF_TensorData(theta_tensor),
-         TF_TensorByteSize(theta_tensor));
+  memcpy(theta_data.data(), TF_TensorData(theta_tensor.get()),
+         TF_TensorByteSize(theta_tensor.get()));
 
   // Initialize space for the numerical gradient.
   vector<float> dtheta_approx(num_elems);
 
   // Get theta shape and store in theta_dims.
-  int num_dims = TF_NumDims(theta_tensor);
+  int num_dims = TF_NumDims(theta_tensor.get());
   vector<int64_t> theta_dims(num_dims);
-  GetDims(theta_tensor, theta_dims.data());
+  GetDims(theta_tensor.get(), theta_dims.data());
 
   // Initialize auxilary data structures.
   vector<float> thetaPlus_data(num_elems);
@@ -140,8 +149,8 @@ Status CalcNumericalGrad(AbstractContext* ctx, Model forward,
     }
 
     // Initialize theta[i] + epsilon.
-    memcpy(thetaPlus_data.data(), TF_TensorData(theta_tensor),
-           TF_TensorByteSize(theta_tensor));
+    memcpy(thetaPlus_data.data(), TF_TensorData(theta_tensor.get()),
+           TF_TensorByteSize(theta_tensor.get()));
     thetaPlus_data[i] += epsilon;
     AbstractTensorHandlePtr thetaPlus;
     {
@@ -153,8 +162,8 @@ Status CalcNumericalGrad(AbstractContext* ctx, Model forward,
     }
 
     // Initialize theta[i] - epsilon.
-    memcpy(&thetaMinus_data[0], TF_TensorData(theta_tensor),
-           TF_TensorByteSize(theta_tensor));
+    memcpy(&thetaMinus_data[0], TF_TensorData(theta_tensor.get()),
+           TF_TensorByteSize(theta_tensor.get()));
     thetaMinus_data[i] -= epsilon;
     AbstractTensorHandlePtr thetaMinus;
     {
@@ -188,11 +197,16 @@ Status CalcNumericalGrad(AbstractContext* ctx, Model forward,
                                 absl::MakeSpan(f_outputs), "diff_quotient"));
     AbstractTensorHandle* diff_quotient = f_outputs[0];
 
-    TF_Tensor* grad_tensor;
-    TF_RETURN_IF_ERROR(GetValue(diff_quotient, &grad_tensor));
+    TF_TensorPtr grad_tensor;
+    {
+      TF_Tensor* grad_tensor_raw = nullptr;
+      TF_RETURN_IF_ERROR(GetValue(diff_quotient, &grad_tensor_raw));
+      grad_tensor.reset(grad_tensor_raw);
+    }
+
     float grad_data[1];
-    memcpy(&grad_data[0], TF_TensorData(grad_tensor),
-           TF_TensorByteSize(grad_tensor));
+    memcpy(&grad_data[0], TF_TensorData(grad_tensor.get()),
+           TF_TensorByteSize(grad_tensor.get()));
 
     dtheta_approx[i] = grad_data[0];
   }
