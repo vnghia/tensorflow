@@ -224,6 +224,7 @@ TensorHandle* TensorHandle::CreateLocalHandle(tensorflow::Tensor&& t, Device* d,
                                               Device* op_device,
                                               Device* resource_device,
                                               EagerContext* ctx) {
+  std::cout << "CreateLocalHandle new TensorHandle\n";
   if (t.dtype() == DT_RESOURCE && t.NumElements() > 0) {
     return new TensorHandle(std::move(t), d, op_device, ctx);
   } else {

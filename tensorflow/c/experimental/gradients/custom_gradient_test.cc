@@ -31,6 +31,10 @@ namespace internal {
 namespace {
 using std::vector;
 
+int64 ToId(const AbstractTensorHandle* t) {
+  return static_cast<int64>(reinterpret_cast<uintptr_t>(t));
+}
+
 class CustomGradientTest
     : public ::testing::TestWithParam<std::tuple<const char*, bool, bool>> {
  protected:
@@ -117,12 +121,15 @@ TEST_P(CustomGradientTest, ExpWithPassThroughGrad) {
                       /*use_function=*/!std::get<2>(GetParam()));
   ASSERT_EQ(errors::OK, s.code()) << s.error_message();
 
+  AbstractTensorHandlePtr output_handle(outputs[0]);
   TF_Tensor* result_tensor;
   s = GetValue(outputs[0], &result_tensor);
+  std::cout << "TensorId ExpWithPassThroughGrad : " << ToId(outputs[0]) << "\n";
+  std::cout << "Tensor Address ExpWithPassThroughGrad : " << outputs[0] << "\n";
   ASSERT_EQ(errors::OK, s.code()) << s.error_message();
   auto result_value = static_cast<float*>(TF_TensorData(result_tensor));
   EXPECT_EQ(*result_value, 1.0);
-  outputs[0]->Unref();
+  // outputs[0]->Unref();
   TF_DeleteTensor(result_tensor);
   result_tensor = nullptr;
 }

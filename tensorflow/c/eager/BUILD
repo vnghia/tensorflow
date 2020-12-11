@@ -225,6 +225,7 @@ cc_library(
         "//tensorflow/core/platform:errors",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
+        "//tensorflow/c:tf_status_helper",
     ],
 )
 

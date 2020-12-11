@@ -617,8 +617,10 @@ Status InitialGradients(
           if (op_it->second.output_tensor_info[j].GetID() == id) {
             found = true;
             Gradient* ones_like = nullptr;
+            std::cout << "BuildOnesLike InitialGradients 1\n";
             TF_RETURN_IF_ERROR(vspace.BuildOnesLike(
                 op_it->second.output_tensor_info[j], &ones_like));
+            std::cout << "BuildOnesLike InitialGradients 1 END\n";
             (*result)[id].push_back(ones_like);
             break;
           }
@@ -635,8 +637,10 @@ Status InitialGradients(
         auto source_tensor = sources_that_are_targets.find(id);
         if (source_tensor != sources_that_are_targets.end()) {
           Gradient* ones_like = nullptr;
+          std::cout << "BuildOnesLike InitialGradients 2\n";
           TF_RETURN_IF_ERROR(
               vspace.BuildOnesLike(source_tensor->second, &ones_like));
+          std::cout << "BuildOnesLike InitialGradients 2 END\n";
           (*result)[id].push_back(ones_like);
         }
       }
@@ -956,6 +960,7 @@ ForwardAccumulator<Gradient, BackwardFunction, TapeTensor>::ForwardpropFromTape(
       // TODO(allenl): Figure out why using zeros_like everywhere causes issues
       // for some gradient functions and if there's another way to work around
       // it (e.g. conds instead of ifs). The value shouldn't really matter.
+      std::cout << "BuildOnesLike ForwardpropFromTape\n";
       TF_RETURN_IF_ERROR(vspace_.BuildOnesLike(output_tensor, &aid));
     }
     if (TF_PREDICT_FALSE(aid == nullptr)) {

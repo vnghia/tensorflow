@@ -21,6 +21,7 @@ limitations under the License.
 #include "tensorflow/core/common_runtime/eager/attr_builder.h"
 #include "tensorflow/core/lib/llvm_rtti/llvm_rtti.h"
 #include "tensorflow/core/platform/errors.h"
+#include "tensorflow/c/tf_status_helper.h"
 
 namespace tensorflow {
 namespace gradients {
@@ -186,6 +187,41 @@ Status TapeVSpace::CallBackwardFunction(
   return gradient_function->Compute(ctx_, output_gradients, result);
 }
 
+Status GetValue(AbstractTensorHandle* t, TF_Tensor** result_tensor) {
+  std::unique_ptr<TF_Status, decltype(&TF_DeleteStatus)> status(
+      TF_NewStatus(), TF_DeleteStatus);
+  TFE_TensorHandle* result_t =
+      TF_AbstractTensorGetEagerTensor(wrap(t), status.get());
+  TF_RETURN_IF_ERROR(StatusFromTF_Status(status.get()));
+  *result_tensor = TFE_TensorHandleResolve(result_t, status.get());
+  return StatusFromTF_Status(status.get());
+}
+
+void printTensor(AbstractTensorHandle* t) {
+  if (!t) {
+    std::cout << "[]\n";
+    return;
+  }
+  TF_Tensor* tensor;
+  Status s = GetValue(t, &tensor);
+  if (!tensor) {
+    std::cout << "[]\n";
+    return;
+  }
+
+  auto num_elem_input = TF_TensorElementCount(tensor);
+  float* dinput = new float[num_elem_input]{0};
+  memcpy(&dinput[0], TF_TensorData(tensor), TF_TensorByteSize(tensor));
+  std::cout << "[ ";
+  for (int j = 0; j < num_elem_input; j++) {
+    std::cout << dinput[j] << " ";
+  }
+  std::cout << "]\n";
+
+  TF_DeleteTensor(tensor);
+  delete dinput;
+}
+
 Status TapeVSpace::BuildOnesLike(const TapeTensor& t,
                                  AbstractTensorHandle** result) const {
   AbstractOperationPtr op(ctx_->CreateOperation());
@@ -200,6 +236,9 @@ Status TapeVSpace::BuildOnesLike(const TapeTensor& t,
   TF_RETURN_IF_ERROR(
       op->Execute(absl::Span<AbstractTensorHandle*>(outputs), &num_outputs));
   *result = outputs[0];
+  std::cout << "BuildOnesLike : ";
+  std::cout << "TensorId BuildOnesLike : " << ToId(*result) << "\n";
+  // printTensor(*result);
   return Status::OK();
 }
 
@@ -216,6 +255,8 @@ TapeTensor TapeVSpace::TapeTensorFromGradient(AbstractTensorHandle* g) const {
 void TapeVSpace::MarkAsResult(AbstractTensorHandle* gradient) const {}
 
 void TapeVSpace::DeleteGradient(AbstractTensorHandle* gradient) const {
+  std::cout << "DeleteGradient : ";
+  printTensor(gradient);
   gradient->Unref();
 }
 

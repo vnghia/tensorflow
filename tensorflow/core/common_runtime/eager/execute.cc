@@ -1027,6 +1027,7 @@ Status GetKernelOutputs(
             /* d= */ output_device,
             /* op_device= */ kernel->device(),
             /* resource_device= */ kernel->OutputResourceDevice(i), ctx);
+            std::cout << "GetKernelOutputs CreateLocalHandle address : " << retvals[i] << "\n";
       } else {
         const DataTypeVector& output_dtypes = kernel->output_dtypes();
         TF_RETURN_IF_ERROR(
