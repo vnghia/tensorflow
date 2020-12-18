@@ -433,6 +433,7 @@ void Sync(const TF_WritableFile* file, TF_Status* status) {
   TF_VLog(1, "WriteFileToS3: s3://%s/%s\n", s3_file->bucket.c_str(),
           s3_file->object.c_str());
   auto position = static_cast<int64_t>(s3_file->outfile->tellp());
+  s3_file->outfile->seekg(0);
   auto handle = s3_file->transfer_manager->UploadFile(
       s3_file->outfile, s3_file->bucket, s3_file->object,
       "application/octet-stream", Aws::Map<Aws::String, Aws::String>());
