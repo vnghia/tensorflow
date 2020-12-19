@@ -87,11 +87,11 @@ static inline void TF_SetStatusFromAWSError(
 void ParseS3Path(const Aws::String& fname, bool object_empty_ok,
                  Aws::String* bucket, Aws::String* object, TF_Status* status) {
   size_t scheme_end = fname.find("://") + 2;
-  if (fname.substr(0, scheme_end + 1) != "s3://") {
-    TF_SetStatus(status, TF_INVALID_ARGUMENT,
-                 "S3 path doesn't start with 's3://'.");
-    return;
-  }
+  // if (fname.substr(0, scheme_end + 1) != "s3://") {
+  //   TF_SetStatus(status, TF_INVALID_ARGUMENT,
+  //                "S3 path doesn't start with 's3://'.");
+  //   return;
+  // }
 
   size_t bucket_end = fname.find("/", scheme_end + 1);
   if (bucket_end == std::string::npos) {
@@ -1271,5 +1271,5 @@ void TF_InitPlugin(TF_FilesystemPluginInfo* info) {
   info->num_schemes = 1;
   info->ops = static_cast<TF_FilesystemPluginOps*>(
       plugin_memory_allocate(info->num_schemes * sizeof(info->ops[0])));
-  ProvideFilesystemSupportFor(&info->ops[0], "s3");
+  ProvideFilesystemSupportFor(&info->ops[0], "s3i");
 }
