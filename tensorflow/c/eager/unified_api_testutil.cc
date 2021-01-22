@@ -19,6 +19,7 @@ limitations under the License.
 #include "tensorflow/c/eager/c_api_test_util.h"
 #include "tensorflow/c/eager/c_api_unified_experimental.h"
 #include "tensorflow/c/eager/c_api_unified_experimental_internal.h"
+#include "tensorflow/c/experimental/ops/math_ops.h"
 #include "tensorflow/c/tf_status.h"
 #include "tensorflow/c/tf_status_helper.h"
 #include "tensorflow/core/framework/tensor_shape.h"
@@ -181,6 +182,32 @@ Status GetValue(AbstractTensorHandle* t, TF_Tensor** result_tensor) {
   TF_RETURN_IF_ERROR(StatusFromTF_Status(status.get()));
   *result_tensor = TFE_TensorHandleResolve(result_t, status.get());
   return StatusFromTF_Status(status.get());
+}
+
+Status UpdateWeights(AbstractContext* ctx,
+                     absl::Span<AbstractTensorHandle*> weights,
+                     absl::Span<AbstractTensorHandle* const> grads,
+                     AbstractTensorHandle* const learning_rate) {
+  size_t num_grads = grads.size();
+  std::vector<AbstractTensorHandle*> temp_outputs(1);
+  std::string name_ops;
+
+  for (size_t i = 0; i < num_grads; ++i) {
+    // `update = learning_rate * grad`
+    name_ops = "UpdateWeights_Mul_" + std::to_string(i);
+    TF_RETURN_IF_ERROR(ops::Mul(ctx, {learning_rate, grads[i]},
+                                absl::MakeSpan(temp_outputs),
+                                name_ops.c_str()));
+    // `grad = grad - update`
+    name_ops = "UpdateWeights_Sub_" + std::to_string(i);
+    TF_RETURN_IF_ERROR(ops::Sub(ctx, {weights[i], temp_outputs[0]},
+                                absl::MakeSpan(temp_outputs),
+                                name_ops.c_str()));
+    if (weights[i]) weights[i]->Unref();
+    weights[i] = temp_outputs[0];
+  }
+
+  return Status::OK();
 }
 
 }  // namespace tensorflow

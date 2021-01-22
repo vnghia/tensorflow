@@ -249,6 +249,7 @@ cc_library(
         "//tensorflow/c:tf_status",
         "//tensorflow/c:tf_status_helper",
         "//tensorflow/c:tf_tensor",
+        "//tensorflow/c/experimental/ops:math_ops",
         "//tensorflow/core:framework",
         "//tensorflow/core/lib/llvm_rtti",
         "//tensorflow/core/platform:errors",

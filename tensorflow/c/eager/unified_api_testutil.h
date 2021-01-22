@@ -65,6 +65,14 @@ Status TestTensorHandleWithDimsInt(AbstractContext* ctx, int* data,
 
 // Places data from `t` into *result_tensor.
 Status GetValue(AbstractTensorHandle* t, TF_Tensor** result_tensor);
+
+// Update weights by using gradient descent algorithm:
+// `weight -= learning_rate * grad`
+// Note that `learning_rate` must be positive.
+Status UpdateWeights(AbstractContext* ctx,
+                     absl::Span<AbstractTensorHandle*> weights,
+                     absl::Span<AbstractTensorHandle* const> grads,
+                     AbstractTensorHandle* const learning_rate);
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_C_EAGER_UNIFIED_API_TESTUTIL_H_
