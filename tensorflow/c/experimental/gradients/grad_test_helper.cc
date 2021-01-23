@@ -124,9 +124,7 @@ Model BuildGradModel(Model forward, GradientRegistry registry) {
     TF_RETURN_IF_ERROR(tape.ComputeGradient(ctx, /*targets=*/temp_outputs,
                                             /*sources=*/inputs,
                                             /*output_gradients=*/{}, outputs));
-    for (auto temp_output : temp_outputs) {
-      temp_output->Unref();
-    }
+    UnrefTensorHandles(&temp_outputs);
     return Status::OK();
   };
 }

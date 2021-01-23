@@ -128,7 +128,7 @@ TEST_P(CppGradients, TestReluGrad) {
   ASSERT_EQ(errors::OK, status_.code()) << status_.error_message();
   ASSERT_NO_FATAL_FAILURE(CheckTensorValue(outputs[0], {0.0f}, /*dims*/ {},
                                            /*abs_error*/ 0));
-  outputs[0]->Unref();
+  UnrefTensorHandles(&outputs);
 }
 
 TEST_P(CppGradients, TestSparseSoftmaxCrossEntropyWithLogitsGrad) {

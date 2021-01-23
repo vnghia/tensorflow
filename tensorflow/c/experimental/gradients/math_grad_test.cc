@@ -360,8 +360,7 @@ TEST_P(CppGradients, TestDivNoNanGrad) {
                                            /*abs_error*/ 0));
   ASSERT_NO_FATAL_FAILURE(CheckTensorValue(outputs[1], {0.0f}, /*dims*/ {},
                                            /*abs_error*/ 0));
-  outputs[0]->Unref();
-  outputs[1]->Unref();
+  UnrefTensorHandles(&outputs);
 }
 
 #ifdef PLATFORM_GOOGLE

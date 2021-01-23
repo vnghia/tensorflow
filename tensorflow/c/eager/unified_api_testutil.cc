@@ -210,4 +210,10 @@ Status UpdateWeights(AbstractContext* ctx,
   return Status::OK();
 }
 
+void UnrefTensorHandles(std::vector<AbstractTensorHandle*>* handles) {
+  for (size_t i{}; i < handles->size(); ++i) {
+    if ((*handles)[i]) (*handles)[i]->Unref();
+  }
+}
+
 }  // namespace tensorflow

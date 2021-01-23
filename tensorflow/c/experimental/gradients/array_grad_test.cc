@@ -111,7 +111,7 @@ TEST_P(CppGradients, TestIdentityNGrad) {
   EXPECT_EQ(outputs[0], nullptr);
   ASSERT_NO_FATAL_FAILURE(CheckTensorValue(outputs[1], {1.0f}, /*dims*/ {},
                                            /*abs_error*/ 0));
-  outputs[1]->Unref();
+  UnrefTensorHandles(&outputs);
 }
 
 #ifdef PLATFORM_GOOGLE

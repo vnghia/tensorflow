@@ -91,9 +91,7 @@ Status MNISTGradModel(AbstractContext* ctx,
                            /*sources={W1,W2}*/ {inputs[1], inputs[2]},
                            /*output_gradients=*/{}, outputs));
 
-  for (auto temp_output : temp_outputs) {
-    temp_output->Unref();
-  }
+  UnrefTensorHandles(&temp_outputs);
   return Status::OK();
 }
 
@@ -178,13 +176,8 @@ TEST_P(CppGradients, TestMNISTGrad) {
   ASSERT_NO_FATAL_FAILURE(CheckTensorValue(outputs[1],
                                            {0.0f, 0.0f, 46.0f, -46.0f},
                                            /*dims*/ {2, 2}, abs_error));
-
-  for (auto mnist_input : mnist_inputs) {
-    mnist_input->Unref();
-  }
-  for (auto output : outputs) {
-    output->Unref();
-  }
+  UnrefTensorHandles(&mnist_inputs);
+  UnrefTensorHandles(&outputs);
 }
 
 #ifdef PLATFORM_GOOGLE

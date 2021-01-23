@@ -73,6 +73,9 @@ Status UpdateWeights(AbstractContext* ctx,
                      absl::Span<AbstractTensorHandle*> weights,
                      absl::Span<AbstractTensorHandle* const> grads,
                      AbstractTensorHandle* const learning_rate);
+
+// Check for `nullptr` and call `Unref` on each handle.
+void UnrefTensorHandles(std::vector<AbstractTensorHandle*>* handles);
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_C_EAGER_UNIFIED_API_TESTUTIL_H_
