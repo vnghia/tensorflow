@@ -131,6 +131,31 @@ Model BuildGradModel(Model forward, GradientRegistry registry) {
   };
 }
 
+absl::BitGen& GetBitGen() {
+  static absl::BitGen gen;
+  return gen;
+}
+
+Status TestRandomTensorHandleFloat(AbstractContext* ctx, float lower,
+                                   float upper, absl::Span<const int64_t> dim,
+                                   AbstractTensorHandle** output) {
+  auto& gen = GetBitGen();
+  if (!dim.size()) {
+    return TestScalarTensorHandle(ctx, absl::Uniform<float>(gen, lower, upper),
+                                  output);
+  }
+  int64_t size = 1;
+  for (size_t i{}; i < dim.size(); ++i) {
+    size *= dim[i];
+  }
+  std::unique_ptr<float[]> data(new float[size]);
+  for (int64_t i{}; i < size; ++i) {
+    data[i] = absl::Uniform(gen, lower, upper);
+  }
+  return TestTensorHandleWithDimsFloat(
+      ctx, data.get(), const_cast<int64_t*>(dim.data()), dim.size(), output);
+}
+
 }  // namespace internal
 }  // namespace gradients
 }  // namespace tensorflow

@@ -15,6 +15,7 @@ limitations under the License.
 #ifndef TENSORFLOW_C_EXPERIMENTAL_GRADIENTS_GRAD_TEST_HELPER_H_
 #define TENSORFLOW_C_EXPERIMENTAL_GRADIENTS_GRAD_TEST_HELPER_H_
 
+#include "absl/random/random.h"
 #include "tensorflow/c/eager/gradients.h"
 #include "tensorflow/c/eager/unified_api_testutil.h"
 
@@ -31,6 +32,14 @@ void CheckTensorValue(AbstractTensorHandle* t, absl::Span<const float> manuals,
                       absl::Span<const int64_t> dims, double abs_error = 1e-2);
 
 Model BuildGradModel(Model forward, GradientRegistry registry);
+
+absl::BitGen& GetBitGen();
+
+// Place a tensor in `output` with shape `dim` and value taken randomly from
+// `[lower, upper)`. Pass `dim` as `{}` for a scalar tensor.
+Status TestRandomTensorHandleFloat(AbstractContext* ctx, float lower,
+                                   float upper, absl::Span<const int64_t> dim,
+                                   AbstractTensorHandle** output);
 
 }  // namespace internal
 }  // namespace gradients

@@ -171,6 +171,7 @@ cc_library(
         "//tensorflow/c/experimental/gradients/tape:tape_context",
         "//tensorflow/core:test",
         "//tensorflow/core:test_main",
+        "@com_google_absl//absl/random",
     ],
 )
 
